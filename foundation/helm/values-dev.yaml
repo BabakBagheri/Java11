@@ -1,18 +1,18 @@
 replicaCount: 1
 stage: dev
 handledSecrets:
-   - key: cosmosdb-connection-string
-     envName: cosmosdb-connection-string
-   - key: rrm-sas-cert-privatekey
-     envName: rrm-sas-cert-privatekey
-   - key: rrm-sas-cert-publickey
-     envName: rrm-sas-cert-publickey
-   - key: urm-idkit-secrets
-     envName: urm-idkit-secrets
-   - key: pam-idkit-secret
-     envName: pam-idkit-secret
+  - key: cosmosdb-connection-string
+    envName: cosmosdb-connection-string
+  - key: rrm-sas-cert-privatekey
+    envName: rrm-sas-cert-privatekey
+  - key: rrm-sas-cert-publickey
+    envName: rrm-sas-cert-publickey
+  - key: urm-idkit-secrets
+    envName: urm-idkit-secrets
+  - key: pam-idkit-secret
+    envName: pam-idkit-secret
 image:
-  name: crmegahubwesteurope.azurecr.io/rrmservice-dev/roles-rights-management-service:5f8071a6
+  name: v1.0.1
   pullPolicy: IfNotPresent
   imagePullSecret: mega-container-registry-secret
 nameOverride: ''
