@@ -1,0 +1,54 @@
+replicaCount: 1
+stage: dev
+handledSecrets:
+   - key: cosmosdb-connection-string
+     envName: cosmosdb-connection-string
+   - key: rrm-sas-cert-privatekey
+     envName: rrm-sas-cert-privatekey
+   - key: rrm-sas-cert-publickey
+     envName: rrm-sas-cert-publickey
+   - key: urm-idkit-secrets
+     envName: urm-idkit-secrets
+   - key: pam-idkit-secret
+     envName: pam-idkit-secret
+image:
+  name: crmegahubwesteurope.azurecr.io/rrmservice-dev/roles-rights-management-service:5f8071a6
+  pullPolicy: IfNotPresent
+  imagePullSecret: mega-container-registry-secret
+nameOverride: ''
+fullnameOverride: ''
+rrmService:
+  containerPort: 8080
+  actuatorPort: 8080
+  resources:
+    limits:
+      memory: 2096Mi
+      cpu: 4000m
+    requests:
+      memory: 1024Mi
+      cpu: 1000m
+health:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 2
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 2
+vault:
+  name: paris-63afb85a
+azure:
+  tenant: c5f6f6e0-4c59-4aa1-bcd7-033f5f211b1c
+  subscription: 02be68bc-1449-4d0e-bfbf-06e9cbcc44be
+  resourceGroupName: rrmservice-dev
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 60
+revisionHistoryLimit: 1

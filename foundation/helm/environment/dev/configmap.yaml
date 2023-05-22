@@ -1,0 +1,15 @@
+mongodb_database_name: rrm-cosmos-mongo-db
+sas_endpoint: https://api.sas-iot.eu.wcardp.io
+sas_clientId: a92c227a-8630-4ccf-a26e-dc117df5e959@eu.dp
+allowed_sas_clientIds: "{vw:'a92c227a-8630-4ccf-a26e-dc117df5e959@eu.dp',audi:'c3c9e791-94b8-4d29-889b-66b4dfb009c9@eu.dp'}"
+vcm_api_endpoint: https://api.product-management-iot.eu.wcardp.io/vcm-external/capabilities/{vin}
+vcm_notifications_endpoint: https://api.product-management-iot.eu.wcardp.io/notifications/pmdp/capabilities
+urm_idkit_clientIds: "{vw:'03dee72c-e356-4099-a831-e9731161c783@apps_vw-dilab_com',audi:'49ede5ff-8707-479f-adcf-54198fe02405@apps_vw-dilab_com'}"
+urm_api_endpoint: https://api.urm-iot.eu.wcarsp.io/service-public/relations/vehicles/{vin}/users
+urm_notification_endpoint: https://events.urm-iot.eu.wcarsp.io
+idkit_endpoint: https://identity-sandbox.vwgroup.io/oidc/v1/token
+pam_api_endpoint: https://api.privacy-iot.eu.dp15.vwg-connect.com/pam-vcf/disabled-reasons/vin
+vcm_poll_interval: "30000"
+urm_poll_interval: "30000"
+sas_token_cache_duration: "3000000"
+pam_idkit_clientId: 03dee72c-e356-4099-a831-e9731161c783@apps_vw-dilab_com

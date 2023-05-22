@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-app"
+  labels:
+    app: "{{ .Release.Name }}-app"
+spec:
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 50%
+  selector:
+    matchLabels:
+      app: "{{ .Release.Name }}-app"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Release.Name }}-app"
+        aadpodidbinding: "{{ .Values.vault.name }}-identity"
+    spec:
+      priorityClassName: "product-low"
+      imagePullSecrets:
+        - name: {{ .Values.image.imagePullSecret | quote }}
+      containers:
+        - name: rrm-service
+          image: {{ .Values.image.name | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          envFrom:
+            - configMapRef:
+                name: rrm-dev-configmap
+            - secretRef:
+                name: rrm-dev-secrets
+          ports:
+            - name: http
+              containerPort: {{ .Values.rrmService.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.health.liveness.path }}
+              port: {{ .Values.rrmService.actuatorPort }}
+            initialDelaySeconds: {{ .Values.health.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.health.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.health.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.health.liveness.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.health.readiness.path }}
+              port: {{ .Values.rrmService.actuatorPort }}
+            initialDelaySeconds: {{ .Values.health.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.health.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.health.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.health.readiness.failureThreshold }}
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "sleep","5" ]
+          resources:
+            {{- toYaml .Values.rrmService.resources | nindent 12 }}
+          securityContext:
+            # Those settings mitigate a lot of vulnerabilities
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 100000
+            runAsGroup: 100000
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              # Tmp folder used by spring to write data. We need to mount this because of "readOnlyRootFilesystem" (see above)
+              mountPath: /tmp/
+            - name: secrets-store-volume
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+
+      # Don't mount all kubernetes services and ports into the env. This behavior corurmResponseponds to the "docker links",
+      # which is deprecated and not used in our services. It
+      # - pollutes the env with lots of entries,
+      # - imposes the risk that applications might mistake the service env as a config parameter
+      #   (e.g. POSTGurmResponse_SERVICE_PORT in keycloak) and
+      # - provides a convenient overview of new target for potential attackers
+      enableServiceLinks: false
+      # Don't mount k8s service account token into pod. This can be used to authenticate to the API server.
+      # It's not used by our services but might be used by potential attackers. There still is the authorization layer,
+      # but one more vulnerability or misconfiguration and the attacker might get access to the API server.
+      automountServiceAccountToken: false
+      volumes:
+        - name: tmp
+          emptyDir: { }
+        - name: secrets-store-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "{{ .Release.Name }}-secrets-provider"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+    affinity:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
