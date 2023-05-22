@@ -1,0 +1,16 @@
+name: 'workflow'
+on:
+  workflow_dispatch:
+
+jobs:
+  test-update-file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update .yml file
+        uses: fjogeleit/yaml-update-action@main
+        with:
+          valueFile: foundation/helm/values-dev.yaml
+          propertyPath: 'image.name'
+          value: v1.0.1
+        continue-on-error: true
